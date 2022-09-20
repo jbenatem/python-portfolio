@@ -1,4 +1,5 @@
 import sqlite3
+import json
 from .entities.user import User
 
 class UserDAO():
@@ -17,7 +18,9 @@ class UserDAO():
         # If an error occurs, then print error message
         except sqlite3.OperationalError as error:
             print(error)
-        con.close()    
+            return False
+        con.close()
+        return True
     
     def listUsers(self):
         users = []
@@ -35,12 +38,12 @@ class UserDAO():
         # Show data
         for row in cur:
             user = User(row[1],row[2],int(row[3]),row[4],row[5])
-            users.append(user)
+            users.append(user.__dict__)
         # Close connection
         con.close()
-        return users
+        return json.dumps(users)
         
-    def listUser(self, id):
+    def listUser(self, id:str):
         query = "SELECT * FROM User WHERE id = ? ORDER BY id"
         values = (id)
         # Start sql connection
@@ -57,7 +60,7 @@ class UserDAO():
         for row in cur:
             user = User(row[1],row[2],int(row[3]),row[4],row[5])
         con.close() 
-        return user
+        return json.dumps(user.__dict__)
     
     def deleteUser(self, id : str):
         query = "DELETE FROM User WHERE id = ?"
@@ -74,8 +77,10 @@ class UserDAO():
         # If an error occurs, then print error message
         except sqlite3.OperationalError as error:
             print(error)
+            return False
         con.close()
-        
+        return True
+
     def editUser(self, user : User, id : str):
         query = "UPDATE User SET firstName = ?, lastName = ?, age = ?, email = ?, phone = ? WHERE id = ?"
         values = (user.getFirstName(), user.getLastName(), user.getAge(), user.getEmail(), user.getPhone(), id)
@@ -91,4 +96,6 @@ class UserDAO():
         # If an error occurs, then print error message
         except sqlite3.OperationalError as error:
             print(error)
+            return False
         con.close()
+        return True
